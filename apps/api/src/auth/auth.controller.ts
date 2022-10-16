@@ -28,4 +28,12 @@ export class AuthController {
   async getCurrentUser(@Request() req) {
     return this.authService.getCurrentUser(req.user);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  async logout(@Session() session: SecureSession) {
+    session.delete();
+
+    return { success: true };
+  }
 }
