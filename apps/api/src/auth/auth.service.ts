@@ -31,6 +31,11 @@ export class AuthService {
     };
   }
 
+  async getCurrentUser({ userId }: { userId: string }) {
+    const user = await this.userService.findById(userId);
+    return this.excludePassword(user);
+  }
+
   private async excludePassword(user: User): Promise<UserWithoutPassword> {
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
