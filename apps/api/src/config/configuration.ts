@@ -1,9 +1,19 @@
-export type AppConfig = {
-  port: number;
-};
-
-export default (): AppConfig => {
+function getConfig() {
   return {
     port: parseInt(process.env.PORT, 10) || 5001,
+    auth: {
+      jwt: {
+        secret: process.env.AUTH_JWT_SECRET,
+        expiresIn: process.env.AUTH_JWT_EXPIRES_IN,
+      },
+      secureSession: {
+        secret: process.env.AUTH_SECURE_SESSION_SECRET,
+        salt: process.env.AUTH_SECURE_SESSION_SALT,
+      },
+    },
   };
-};
+}
+
+export type AppConfig = ReturnType<typeof getConfig>;
+
+export default getConfig;

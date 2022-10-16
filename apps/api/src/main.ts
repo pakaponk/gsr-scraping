@@ -4,8 +4,8 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import secureSession from '@fastify/secure-session';
 import { AppModule } from './app.module';
-import type { AppConfig } from './config/configuration';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -13,7 +13,16 @@ async function bootstrap() {
     new FastifyAdapter(),
   );
 
-  const configService = app.get(ConfigService<AppConfig>);
+  const configService = app.get(ConfigService);
+
+  await app.register(secureSession, {
+    secret: configService.get<string>('auth.secureSession.secret'),
+    salt: configService.get<string>('auth.secureSession.salt'),
+    cookie: {
+      httpOnly: true,
+      domain: 'localhost',
+    },
+  });
 
   const port = configService.get<number>('port');
 
