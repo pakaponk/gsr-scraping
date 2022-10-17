@@ -8,36 +8,15 @@ import {
   CloseButton,
   Container,
   Flex,
-  FormControl,
-  FormLabel,
   Heading,
-  Input,
-  Stack,
   Text,
   useDisclosure,
   VStack,
 } from '@chakra-ui/react';
 import type { NextPage } from 'next';
 import { useState } from 'react';
+import { LoginForm } from '../src/Components/LoginForm';
 import { SignupForm } from '../src/Components/SignupForm';
-
-function LoginForm() {
-  return (
-    <Stack as="form" spacing={4} width="full">
-      <FormControl>
-        <FormLabel htmlFor="email">Email address</FormLabel>
-        <Input type="email" name="email" placeholder="Email" />
-      </FormControl>
-      <FormControl>
-        <FormLabel htmlFor="password">Password</FormLabel>
-        <Input type="password" name="password" placeholder="Password" />
-      </FormControl>
-      <Button type="submit" variant="solid" colorScheme="blue">
-        Sign in
-      </Button>
-    </Stack>
-  );
-}
 
 type SuccessSignupAlertProps = {
   onClose: () => void;
