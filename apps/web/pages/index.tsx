@@ -66,14 +66,9 @@ const Home: NextPage = () => {
   };
 
   return (
-    <Flex direction="column" bgColor="gray.100">
-      <Container display="flex" minH="100vh">
-        <VStack
-          spacing="8"
-          justifyContent="center"
-          alignItems="center"
-          flexGrow="1"
-        >
+    <Box bgColor="gray.100">
+      <Container py={12} minH="100vh">
+        <VStack spacing="8">
           {isSignupAlertShown && (
             <SuccessSignupAlert onClose={closeSignupAlert} />
           )}
@@ -105,7 +100,7 @@ const Home: NextPage = () => {
           </Flex>
         </VStack>
       </Container>
-    </Flex>
+    </Box>
   );
 };
 
