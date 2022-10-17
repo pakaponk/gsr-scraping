@@ -6,7 +6,9 @@ import {
   Input,
   Stack,
 } from '@chakra-ui/react';
+import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
+import { fetchLogin } from '../api';
 
 type FormValue = {
   email: string;
@@ -20,8 +22,15 @@ export function LoginForm() {
     formState: { errors },
   } = useForm<FormValue>();
 
-  const onValid: Parameters<typeof handleSubmit>[0] = ({ email, password }) => {
-    // TODO: Send Login Request
+  const { mutateAsync: login } = useMutation((credential: FormValue) => {
+    return fetchLogin(credential);
+  });
+
+  const onValid: Parameters<typeof handleSubmit>[0] = async ({
+    email,
+    password,
+  }) => {
+    await login({ email, password });
   };
 
   return (
