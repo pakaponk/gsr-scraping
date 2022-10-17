@@ -28,7 +28,7 @@ function LoginForm() {
         <Input type="password" name="password" placeholder="Password" />
       </FormControl>
       <Button type="submit" variant="solid" colorScheme="blue">
-        Login
+        Sign in
       </Button>
     </Stack>
   );
