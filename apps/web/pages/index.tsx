@@ -12,9 +12,11 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react';
+import { useMutation } from '@tanstack/react-query';
 import type { NextPage } from 'next';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { fetchSignup } from '../src/api';
 
 function LoginForm() {
   return (
@@ -45,11 +47,19 @@ function SignupForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     setError,
   } = useForm<FormValue>();
 
-  const onValid: Parameters<typeof handleSubmit>[0] = ({
+  const { mutateAsync: signup } = useMutation(
+    (newUser: Omit<FormValue, 'confirmPassword'>) => {
+      return fetchSignup(newUser);
+    }
+  );
+
+  const onValid: Parameters<typeof handleSubmit>[0] = async ({
+    name,
+    email,
     password,
     confirmPassword,
   }) => {
@@ -67,12 +77,19 @@ function SignupForm() {
       return;
     }
 
-    // TODO: Send Sign up Request
+    try {
+      await signup({ name, email, password });
+    } catch (error) {
+      setError('email', {
+        type: 'notUnique',
+        message: 'Thie email has already been used',
+      });
+    }
   };
 
   return (
     <Stack as="form" spacing={4} width="full" onSubmit={handleSubmit(onValid)}>
-      <FormControl isInvalid={!!errors.name}>
+      <FormControl isInvalid={!!errors.name} isDisabled={isSubmitting}>
         <FormLabel htmlFor="name">Name</FormLabel>
         <Input
           {...register('name', {
@@ -83,7 +100,7 @@ function SignupForm() {
         />
         <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
       </FormControl>
-      <FormControl isInvalid={!!errors.email}>
+      <FormControl isInvalid={!!errors.email} isDisabled={isSubmitting}>
         <FormLabel htmlFor="email">Email address</FormLabel>
         <Input
           {...register('email', {
@@ -94,7 +111,7 @@ function SignupForm() {
         />
         <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
       </FormControl>
-      <FormControl isInvalid={!!errors.password}>
+      <FormControl isInvalid={!!errors.password} isDisabled={isSubmitting}>
         <FormLabel htmlFor="password">Password</FormLabel>
         <Input
           {...register('password', {
@@ -112,7 +129,10 @@ function SignupForm() {
           <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
         )}
       </FormControl>
-      <FormControl isInvalid={!!errors.confirmPassword}>
+      <FormControl
+        isInvalid={!!errors.confirmPassword}
+        isDisabled={isSubmitting}
+      >
         <FormLabel htmlFor="confirmPassword">Confirm Password</FormLabel>
         <Input
           {...register('confirmPassword', {
@@ -122,7 +142,12 @@ function SignupForm() {
         />
         <FormErrorMessage>{errors.confirmPassword?.message}</FormErrorMessage>
       </FormControl>
-      <Button type="submit" variant="solid" colorScheme="blue">
+      <Button
+        type="submit"
+        variant="solid"
+        colorScheme="blue"
+        isLoading={isSubmitting}
+      >
         Sign up
       </Button>
     </Stack>
