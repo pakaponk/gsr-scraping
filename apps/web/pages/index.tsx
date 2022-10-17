@@ -1,5 +1,11 @@
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+  Box,
   Button,
+  CloseButton,
   Container,
   Flex,
   FormControl,
@@ -10,6 +16,7 @@ import {
   Input,
   Stack,
   Text,
+  useDisclosure,
   VStack,
 } from '@chakra-ui/react';
 import { useMutation } from '@tanstack/react-query';
@@ -43,7 +50,11 @@ type FormValue = {
   confirmPassword: string;
 };
 
-function SignupForm() {
+type SignUpFormProps = {
+  onSuccess: () => void;
+};
+
+function SignupForm({ onSuccess }: SignUpFormProps) {
   const {
     register,
     handleSubmit,
@@ -79,6 +90,7 @@ function SignupForm() {
 
     try {
       await signup({ name, email, password });
+      onSuccess();
     } catch (error) {
       setError('email', {
         type: 'notUnique',
@@ -154,8 +166,41 @@ function SignupForm() {
   );
 }
 
+type SuccessSignupAlertProps = {
+  onClose: () => void;
+};
+
+function SuccessSignupAlert({ onClose }: SuccessSignupAlertProps) {
+  return (
+    <Alert status="success" borderRadius="8px">
+      <AlertIcon />
+      <Box flexGrow={1}>
+        <AlertTitle>Success!</AlertTitle>
+        <AlertDescription>
+          Your account have been created successfuly
+        </AlertDescription>
+      </Box>
+      <CloseButton
+        alignSelf="flex-start"
+        position="relative"
+        right="-1"
+        top="-1"
+        onClick={onClose}
+      />
+    </Alert>
+  );
+}
+
 const Home: NextPage = () => {
   const [formState, setFormState] = useState<'LOGIN' | 'SIGNUP'>('LOGIN');
+
+  const {
+    isOpen: isSignupAlertShown,
+    onOpen: showSignupAlert,
+    onClose: closeSignupAlert,
+  } = useDisclosure({
+    defaultIsOpen: false,
+  });
 
   const headingLabel =
     formState === 'LOGIN' ? 'Sign in to your account' : 'Create a new account';
@@ -177,6 +222,9 @@ const Home: NextPage = () => {
           alignItems="center"
           flexGrow="1"
         >
+          {isSignupAlertShown && (
+            <SuccessSignupAlert onClose={closeSignupAlert} />
+          )}
           <VStack spacing="2">
             <Heading textAlign="center">{headingLabel}</Heading>
             <Text>
@@ -194,7 +242,14 @@ const Home: NextPage = () => {
             borderRadius="8px"
           >
             {formState === 'LOGIN' && <LoginForm />}
-            {formState === 'SIGNUP' && <SignupForm />}
+            {formState === 'SIGNUP' && (
+              <SignupForm
+                onSuccess={() => {
+                  setFormState('LOGIN');
+                  showSignupAlert();
+                }}
+              />
+            )}
           </Flex>
         </VStack>
       </Container>
