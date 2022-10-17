@@ -7,7 +7,7 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async findByEmail(email: string): Promise<User | undefined> {
-    return this.prisma.user.findFirst({
+    return this.prisma.user.findUnique({
       where: {
         email,
       },
@@ -15,7 +15,7 @@ export class UserService {
   }
 
   async findById(id: string): Promise<User | undefined> {
-    return this.prisma.user.findFirst({
+    return this.prisma.user.findUnique({
       where: {
         id,
       },
