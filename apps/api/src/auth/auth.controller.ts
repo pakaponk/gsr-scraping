@@ -5,11 +5,13 @@ import {
   Request,
   UseGuards,
   Session,
+  Body,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import type { Session as SecureSession } from '@fastify/secure-session';
+import { CreateUserDto } from './dtos/create-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -35,5 +37,13 @@ export class AuthController {
     session.delete();
 
     return { success: true };
+  }
+
+  @Post('local/register')
+  async localRegister(@Body() createUserDto: CreateUserDto) {
+    const user = await this.authService.localRegister(createUserDto);
+    return {
+      user,
+    };
   }
 }

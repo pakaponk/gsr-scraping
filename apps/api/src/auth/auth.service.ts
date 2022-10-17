@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { UserService } from '../user/user.service';
+import { CreateUserDto } from './dtos/create-user.dto';
 
 type UserWithoutPassword = Omit<User, 'password'>;
 
@@ -39,5 +40,14 @@ export class AuthService {
   private async excludePassword(user: User): Promise<UserWithoutPassword> {
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
+  }
+
+  async localRegister({
+    email,
+    name,
+    password,
+  }: CreateUserDto): Promise<UserWithoutPassword> {
+    const user = await this.userService.create({ email, name, password });
+    return this.excludePassword(user);
   }
 }
