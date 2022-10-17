@@ -4,6 +4,7 @@ import { UserService } from '../user/user.service';
 import { PrismaService } from '../prisma.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import * as argon2 from 'argon2';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -41,6 +42,32 @@ describe('AuthController', () => {
 
       const newTotalUsers = await prisma.user.count();
       expect(newTotalUsers).toEqual(totalUsers + 1);
+    });
+    it('password must be hashed', async () => {
+      const mockCreateUserDto = {
+        email: 'test@example.com',
+        name: 'John Doe',
+        password: '1q2w3e4r',
+      };
+
+      const { user } = await controller.localRegister(mockCreateUserDto);
+
+      const userWithPassword = await prisma.user.findUnique({
+        where: { id: user.id },
+      });
+
+      try {
+        expect(
+          await argon2.verify(
+            userWithPassword.password,
+            mockCreateUserDto.password,
+          ),
+        ).toEqual(true);
+      } catch (error) {
+        throw new Error(
+          'Password should be hased with Argon2 before saving to the database',
+        );
+      }
     });
   });
 

@@ -47,7 +47,12 @@ export class AuthService {
     name,
     password,
   }: CreateUserDto): Promise<UserWithoutPassword> {
-    const user = await this.userService.create({ email, name, password });
+    const hashedPasssword = await argon2.hash(password);
+    const user = await this.userService.create({
+      email,
+      name,
+      password: hashedPasssword,
+    });
     return this.excludePassword(user);
   }
 }
