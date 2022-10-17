@@ -3,6 +3,7 @@ import {
   Container,
   Flex,
   FormControl,
+  FormErrorMessage,
   FormHelperText,
   FormLabel,
   Heading,
@@ -13,6 +14,7 @@ import {
 } from '@chakra-ui/react';
 import type { NextPage } from 'next';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 function LoginForm() {
   return (
@@ -32,25 +34,93 @@ function LoginForm() {
   );
 }
 
+type FormValue = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
+
 function SignupForm() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError,
+  } = useForm<FormValue>();
+
+  const onValid: Parameters<typeof handleSubmit>[0] = ({
+    password,
+    confirmPassword,
+  }) => {
+    if (password !== confirmPassword) {
+      setError(
+        'confirmPassword',
+        {
+          type: 'mismatch',
+          message: 'Should be the same as Password',
+        },
+        {
+          shouldFocus: true,
+        }
+      );
+      return;
+    }
+
+    // TODO: Send Sign up Request
+  };
+
   return (
-    <Stack as="form" spacing={4} width="full">
-      <FormControl>
+    <Stack as="form" spacing={4} width="full" onSubmit={handleSubmit(onValid)}>
+      <FormControl isInvalid={!!errors.name}>
         <FormLabel htmlFor="name">Name</FormLabel>
-        <Input type="text" name="name" />
+        <Input
+          {...register('name', {
+            required: 'Please fill your name',
+            setValueAs: (value) => value.trim(),
+          })}
+          type="text"
+        />
+        <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
       </FormControl>
-      <FormControl>
+      <FormControl isInvalid={!!errors.email}>
         <FormLabel htmlFor="email">Email address</FormLabel>
-        <Input type="email" name="email" />
+        <Input
+          {...register('email', {
+            required: 'Please fill your email address',
+            setValueAs: (value) => value.trim(),
+          })}
+          type="email"
+        />
+        <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
       </FormControl>
-      <FormControl>
+      <FormControl isInvalid={!!errors.password}>
         <FormLabel htmlFor="password">Password</FormLabel>
-        <Input type="password" name="password" />
-        <FormHelperText>Must have at least 8 characters</FormHelperText>
+        <Input
+          {...register('password', {
+            required: 'Please fill your password',
+            minLength: {
+              value: 8,
+              message: 'Password must have at least 8 characters',
+            },
+          })}
+          type="password"
+        />
+        {!errors.password ? (
+          <FormHelperText>Must have at least 8 characters</FormHelperText>
+        ) : (
+          <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
+        )}
       </FormControl>
-      <FormControl>
+      <FormControl isInvalid={!!errors.confirmPassword}>
         <FormLabel htmlFor="confirmPassword">Confirm Password</FormLabel>
-        <Input type="password" name="confirmPassword" />
+        <Input
+          {...register('confirmPassword', {
+            required: 'Please fill your confirm password',
+          })}
+          type="password"
+        />
+        <FormErrorMessage>{errors.confirmPassword?.message}</FormErrorMessage>
       </FormControl>
       <Button type="submit" variant="solid" colorScheme="blue">
         Sign up
