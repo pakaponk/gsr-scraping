@@ -1,8 +1,13 @@
 import {
   Box,
+  Button,
   Center,
   Container,
+  Flex,
+  FormControl,
   Heading,
+  Input,
+  Spacer,
   Spinner,
   Table,
   TableContainer,
@@ -15,6 +20,7 @@ import {
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { NextPage } from 'next';
+import { ChangeEventHandler, PropsWithChildren, useRef } from 'react';
 import { fecthReports } from '../src/api';
 import { Navbar } from '../src/Components/Navbar';
 import { useAuth } from '../src/Hooks/useAuth';
@@ -77,11 +83,59 @@ const ReportList = ({ reports }: ReportListProps) => {
   );
 };
 
+type FileInputButtonProps = {
+  onFileSelected: ChangeEventHandler<HTMLInputElement>;
+};
+
+function FileInputButton({
+  children,
+  onFileSelected,
+}: PropsWithChildren<FileInputButtonProps>) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <form>
+      <FormControl hidden>
+        <Input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv"
+          onClick={() => {
+            // Allow users to select the same file as the previous one
+            if (fileInputRef.current) {
+              fileInputRef.current.value = '';
+            }
+          }}
+          onChange={onFileSelected}
+        />
+      </FormControl>
+      <Button
+        variant="solid"
+        colorScheme="blue"
+        onClick={() => {
+          fileInputRef.current?.click();
+        }}
+      >
+        {children}
+      </Button>
+    </form>
+  );
+}
+
 const Reports: NextPage = () => {
   const [{ authState, user }] = useAuth();
 
   const { data, isLoading } = useQuery(['my-reports', user?.id], fecthReports);
   const reports = data?.reports ?? [];
+
+  const onUpload: FileInputButtonProps['onFileSelected'] = (event) => {
+    const file = event.target.files?.[0] ?? null;
+
+    if (file) {
+      // TODO: Upload file to API to start scraping
+      alert(`Upload ${file.name}`);
+    }
+  };
 
   switch (authState) {
     case 'PENDING': {
@@ -101,7 +155,13 @@ const Reports: NextPage = () => {
             maxWidth="container.xl"
           >
             <VStack spacing={8} alignItems="start">
-              <Heading>Reports</Heading>
+              <Flex width="full">
+                <Heading>Reports</Heading>
+                <Spacer />
+                <FileInputButton onFileSelected={onUpload}>
+                  Upload keywords
+                </FileInputButton>
+              </Flex>
               {!isLoading && <ReportList reports={reports} />}
             </VStack>
           </Container>
