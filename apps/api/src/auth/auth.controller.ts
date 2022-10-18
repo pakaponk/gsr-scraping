@@ -22,6 +22,9 @@ export class AuthController {
   async login(@Request() req, @Session() session: SecureSession) {
     const { access_token } = await this.authService.login(req.user);
     session.set('token', access_token);
+    session.options({
+      path: '/',
+    });
     return req.user;
   }
 

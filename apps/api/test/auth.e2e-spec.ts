@@ -76,6 +76,7 @@ describe('Auth (e2e)', () => {
             name: 'session',
             value: expect.any(String),
             httpOnly: true,
+            path: '/',
           });
         });
     });
