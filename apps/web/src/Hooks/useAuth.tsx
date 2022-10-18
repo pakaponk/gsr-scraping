@@ -62,7 +62,7 @@ export function AuthProvider({ children }: PropsWithChildren<{}>) {
   const router = useRouter();
 
   const {
-    isFetching: isFetchingCurrenrUser,
+    isLoading: isLoadingCurrentUser,
     isSuccess,
     data: currentUser,
   } = useQuery(['current-user'], fetchCurrentUser, {
@@ -70,14 +70,14 @@ export function AuthProvider({ children }: PropsWithChildren<{}>) {
   });
 
   useEffect(() => {
-    if (!isFetchingCurrenrUser) {
+    if (!isLoadingCurrentUser) {
       if (isSuccess) {
         dispatch({ type: 'login', payload: { user: currentUser } });
       } else {
         dispatch({ type: 'logout' });
       }
     }
-  }, [isFetchingCurrenrUser, isSuccess, currentUser]);
+  }, [isLoadingCurrentUser, isSuccess, currentUser]);
 
   useEffect(() => {
     if (authState === 'AUTHENTICATED') {
