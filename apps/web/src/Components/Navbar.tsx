@@ -9,7 +9,9 @@ import {
   Spacer,
   Text,
 } from '@chakra-ui/react';
+import { useMutation } from '@tanstack/react-query';
 import { PropsWithChildren } from 'react';
+import { fetchLogout } from '../api';
 import { useAuth } from '../Hooks/useAuth';
 
 const Header = ({ children }: PropsWithChildren<BoxProps>) => (
@@ -28,7 +30,16 @@ const Header = ({ children }: PropsWithChildren<BoxProps>) => (
 );
 
 export const Navbar = () => {
-  const [{ user }] = useAuth();
+  const [{ user }, dispatch] = useAuth();
+
+  const { mutateAsync: logout, isLoading: isLoggingOut } = useMutation(() =>
+    fetchLogout()
+  );
+
+  const onSignout = async () => {
+    await logout();
+    dispatch({ type: 'logout' });
+  };
 
   return (
     <Header>
@@ -39,7 +50,12 @@ export const Navbar = () => {
             <Text>{user?.name}</Text>
           </HStack>
           <Spacer />
-          <Button variant="outline" colorScheme="blue">
+          <Button
+            variant="outline"
+            colorScheme="blue"
+            onClick={onSignout}
+            isLoading={isLoggingOut}
+          >
             Sign out
           </Button>
         </Flex>

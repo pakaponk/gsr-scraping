@@ -44,6 +44,22 @@ export async function fetchCurrentUser() {
   }
 }
 
+export async function fetchLogout() {
+  const res = await fetch(`${BASE_API}/auth/logout`, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+
+  const json = await res.json();
+  if (res.ok) {
+    return json;
+  }
+}
+
 export async function fetchSignup({
   name,
   email,

@@ -18,7 +18,7 @@ export interface User {
   updatedAt: Date;
 }
 
-type Action = { type: 'login'; payload: { user: User } };
+type Action = { type: 'login'; payload: { user: User } } | { type: 'logout' };
 
 type State = {
   authState: 'PENDING' | 'AUTHENTICATED' | 'UNAUTHENTICATED';
@@ -37,6 +37,13 @@ function reducer(state: State, action: Action): State {
         ...state,
         authState: 'AUTHENTICATED',
         user: action.payload.user,
+      };
+    }
+    case 'logout': {
+      return {
+        ...state,
+        authState: 'UNAUTHENTICATED',
+        user: null,
       };
     }
     default: {
@@ -72,6 +79,10 @@ export function AuthProvider({ children }: PropsWithChildren<{}>) {
     if (authState === 'AUTHENTICATED') {
       if (router.pathname === '/') {
         router.push('/reports');
+      }
+    } else if (authState === 'UNAUTHENTICATED') {
+      if (router.pathname !== '/') {
+        router.push('/');
       }
     }
   }, [authState, router]);
