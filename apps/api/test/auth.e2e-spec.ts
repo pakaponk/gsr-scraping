@@ -8,6 +8,7 @@ import { PrismaService } from '../src/prisma.service';
 import { AppModule } from '../src/app.module';
 import { ConfigService } from '@nestjs/config';
 import secureSession from '@fastify/secure-session';
+import { userBuilder } from './utils/mock';
 
 describe('Auth (e2e)', () => {
   let app: NestFastifyApplication;
@@ -41,11 +42,7 @@ describe('Auth (e2e)', () => {
 
   describe('POST /auth/login', () => {
     it('set HttpOnly session cookie when valid credential is given', async () => {
-      const mockUser = {
-        name: 'John Doe',
-        email: 'test@example.com',
-        password: '1q2w3e4r',
-      };
+      const mockUser = userBuilder();
 
       const hashedPasssword = await argon2.hash(mockUser.password);
 
@@ -83,11 +80,7 @@ describe('Auth (e2e)', () => {
         });
     });
     it('return a user without password when valid credential is given', async () => {
-      const mockUser = {
-        name: 'John Doe',
-        email: 'test@example.com',
-        password: '1q2w3e4r',
-      };
+      const mockUser = userBuilder();
 
       const hashedPasssword = await argon2.hash(mockUser.password);
 
@@ -119,11 +112,7 @@ describe('Auth (e2e)', () => {
         });
     });
     it('return 401 Unauthenticated when the password is incorrect', async () => {
-      const mockUser = {
-        name: 'John Doe',
-        email: 'test@example.com',
-        password: '1q2w3e4r',
-      };
+      const mockUser = userBuilder();
 
       const hashedPasssword = await argon2.hash(mockUser.password);
 

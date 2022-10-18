@@ -1,10 +1,11 @@
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
+import * as argon2 from 'argon2';
 import { UserService } from '../user/user.service';
 import { PrismaService } from '../prisma.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import * as argon2 from 'argon2';
+import { userBuilder } from '../../test/utils/mock';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -22,10 +23,11 @@ describe('AuthController', () => {
 
   describe('POST /auth/local/register', () => {
     it('create a new user', async () => {
+      const mockNewUser = userBuilder();
       const mockCreateUserDto = {
-        email: 'test@example.com',
-        name: 'John Doe',
-        password: '1q2w3e4r',
+        email: mockNewUser.email,
+        name: mockNewUser.name,
+        password: mockNewUser.password,
       };
 
       const totalUsers = await prisma.user.count();
@@ -44,10 +46,11 @@ describe('AuthController', () => {
       expect(newTotalUsers).toEqual(totalUsers + 1);
     });
     it('password must be hashed', async () => {
+      const mockNewUser = userBuilder();
       const mockCreateUserDto = {
-        email: 'test@example.com',
-        name: 'John Doe',
-        password: '1q2w3e4r',
+        email: mockNewUser.email,
+        name: mockNewUser.name,
+        password: mockNewUser.password,
       };
 
       const { user } = await controller.localRegister(mockCreateUserDto);
