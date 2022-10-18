@@ -29,6 +29,21 @@ export async function fetchLogin({
   }
 }
 
+export async function fetchCurrentUser() {
+  const res = await fetch(`${BASE_API}/auth/current`, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    method: 'GET',
+  });
+
+  const json = await res.json();
+  if (res.ok) {
+    return json;
+  }
+}
+
 export async function fetchSignup({
   name,
   email,

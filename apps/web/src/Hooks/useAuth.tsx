@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
 import {
   useContext,
@@ -7,6 +8,7 @@ import {
   useReducer,
   useEffect,
 } from 'react';
+import { fetchCurrentUser } from '../api';
 
 export interface User {
   id: string;
@@ -52,14 +54,24 @@ export function AuthProvider({ children }: PropsWithChildren<{}>) {
 
   const router = useRouter();
 
+  const {
+    isFetching: isFetchingCurrenrUser,
+    isSuccess,
+    data: currentUser,
+  } = useQuery(['current-user'], fetchCurrentUser);
+
+  useEffect(() => {
+    if (!isFetchingCurrenrUser) {
+      if (isSuccess) {
+        dispatch({ type: 'login', payload: { user: currentUser } });
+      }
+    }
+  }, [isFetchingCurrenrUser, isSuccess, currentUser]);
+
   useEffect(() => {
     if (authState === 'AUTHENTICATED') {
       if (router.pathname === '/') {
         router.push('/reports');
-      }
-    } else if (authState === 'UNAUTHENTICATED') {
-      if (router.pathname !== '/') {
-        router.push('/');
       }
     }
   }, [authState, router]);
