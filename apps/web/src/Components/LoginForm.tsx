@@ -9,6 +9,7 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { fetchLogin } from '../api';
+import { useAuth } from '../Hooks/useAuth';
 
 type FormValue = {
   email: string;
@@ -22,6 +23,8 @@ export function LoginForm() {
     formState: { errors },
   } = useForm<FormValue>();
 
+  const [, dispatch] = useAuth();
+
   const { mutateAsync: login } = useMutation((credential: FormValue) => {
     return fetchLogin(credential);
   });
@@ -30,7 +33,8 @@ export function LoginForm() {
     email,
     password,
   }) => {
-    await login({ email, password });
+    const user = await login({ email, password });
+    dispatch({ type: 'login', payload: { user } });
   };
 
   return (

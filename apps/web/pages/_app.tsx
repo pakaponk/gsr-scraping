@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-query';
 import type { AppProps } from 'next/app';
 import { useState } from 'react';
+import { AuthProvider } from '../src/Hooks/useAuth';
 
 function MyApp({
   Component,
@@ -17,7 +18,9 @@ function MyApp({
     <ChakraProvider>
       <QueryClientProvider client={queryClient}>
         <Hydrate state={pageProps.dehydratedState}>
-          <Component {...pageProps} />
+          <AuthProvider>
+            <Component {...pageProps} />
+          </AuthProvider>
         </Hydrate>
       </QueryClientProvider>
     </ChakraProvider>
