@@ -13,7 +13,9 @@ import {
   Tr,
   VStack,
 } from '@chakra-ui/react';
+import { useQuery } from '@tanstack/react-query';
 import { NextPage } from 'next';
+import { fecthReports } from '../src/api';
 import { Navbar } from '../src/Components/Navbar';
 import { useAuth } from '../src/Hooks/useAuth';
 
@@ -22,24 +24,13 @@ interface Report {
   keyword: string;
   totalAdwords: number;
   totalLinks: number;
-  totalSearchResults: string;
+  totalSearchResults: number;
   updatedAt: string;
 }
 
 type ReportListProps = {
   reports: Report[];
 };
-
-const mockReports: Report[] = [
-  {
-    id: 'test-report-1',
-    keyword: 'google',
-    totalAdwords: 10,
-    totalLinks: 100,
-    totalSearchResults: '100000000',
-    updatedAt: new Date().toISOString(),
-  },
-];
 
 const ReportList = ({ reports }: ReportListProps) => {
   return (
@@ -87,7 +78,10 @@ const ReportList = ({ reports }: ReportListProps) => {
 };
 
 const Reports: NextPage = () => {
-  const [{ authState }] = useAuth();
+  const [{ authState, user }] = useAuth();
+
+  const { data, isLoading } = useQuery(['my-reports', user?.id], fecthReports);
+  const reports = data?.reports ?? [];
 
   switch (authState) {
     case 'PENDING': {
@@ -108,7 +102,7 @@ const Reports: NextPage = () => {
           >
             <VStack spacing={8} alignItems="start">
               <Heading>Reports</Heading>
-              <ReportList reports={mockReports} />
+              {!isLoading && <ReportList reports={reports} />}
             </VStack>
           </Container>
         </Box>

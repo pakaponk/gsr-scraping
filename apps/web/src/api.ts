@@ -90,3 +90,21 @@ export async function fetchSignup({
     throw new Error('This email has already been used');
   }
 }
+
+export async function fecthReports() {
+  const res = await fetch(`${BASE_API}/reports`, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    method: 'GET',
+  });
+
+  const json = await res.json();
+
+  if (res.ok) {
+    return json;
+  } else {
+    throw new Error('Unknown error');
+  }
+}
