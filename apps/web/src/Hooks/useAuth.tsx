@@ -65,12 +65,16 @@ export function AuthProvider({ children }: PropsWithChildren<{}>) {
     isFetching: isFetchingCurrenrUser,
     isSuccess,
     data: currentUser,
-  } = useQuery(['current-user'], fetchCurrentUser);
+  } = useQuery(['current-user'], fetchCurrentUser, {
+    retry: false,
+  });
 
   useEffect(() => {
     if (!isFetchingCurrenrUser) {
       if (isSuccess) {
         dispatch({ type: 'login', payload: { user: currentUser } });
+      } else {
+        dispatch({ type: 'logout' });
       }
     }
   }, [isFetchingCurrenrUser, isSuccess, currentUser]);
