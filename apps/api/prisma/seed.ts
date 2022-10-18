@@ -36,6 +36,21 @@ async function seed() {
     data: mockUsers,
     skipDuplicates: true,
   });
+
+  const mockReports = mockUsers.flatMap((mockUser) => {
+    return Array.from({ length: 3 }, () => {
+      return reportBuilder({
+        overrides: {
+          userId: mockUser.id,
+        },
+        traits: 'success',
+      });
+    });
+  });
+
+  await prisma.report.createMany({
+    data: mockReports,
+  });
 }
 
 seed()
