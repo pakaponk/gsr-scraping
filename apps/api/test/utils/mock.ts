@@ -16,7 +16,8 @@ export const userBuilder = build<User>('User', {
 export const reportBuilder = build<Report>('Report', {
   fields: {
     id: perBuild(() => faker.datatype.uuid()),
-    userId: perBuild(() => faker.datatype.uuid()),
+    userId: null,
+    scrapingJobId: null,
     keyword: perBuild(() => faker.word.noun()),
     status: 'PENDING',
     totalAdwords: null,
