@@ -6,6 +6,7 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import secureSession from '@fastify/secure-session';
+import multipart from '@fastify/multipart';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -30,6 +31,8 @@ async function bootstrap() {
       domain: 'localhost',
     },
   });
+
+  await app.register(multipart);
 
   const port = configService.get<number>('port');
 
