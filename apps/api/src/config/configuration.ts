@@ -11,6 +11,10 @@ function getConfig() {
         salt: process.env.AUTH_SECURE_SESSION_SALT,
       },
     },
+    queue: {
+      host: process.env.QUEUE_HOST,
+      port: parseInt(process.env.QUEUE_PORT, 10) || 6379,
+    },
   };
 }
 
