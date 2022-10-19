@@ -1,5 +1,6 @@
+import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import configuration from './config/configuration';
@@ -13,6 +14,15 @@ import { PrismaService } from './prisma.service';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
+    }),
+    BullModule.forRootAsync({
+      useFactory: async (configService: ConfigService) => ({
+        redis: {
+          host: configService.get<string>('queue.host'),
+          port: configService.get<number>('queue.port'),
+        },
+      }),
+      inject: [ConfigService],
     }),
     AuthModule,
     UserModule,
