@@ -136,16 +136,15 @@ describe('ScrapingJobController', () => {
       const ONE_MINUTE_IN_MS = 60 * 1000;
       createdReports.forEach((report, index) => {
         const job = jobs[index];
-        expect(job).toMatchObject({
-          opts: {
-            attempts: 3,
-            timeout: ONE_MINUTE_IN_MS,
-            removeOnComplete: true,
-          },
-          data: {
-            reportId: report.id,
-            keyword: report.keyword,
-          },
+        expect(job.opts).toMatchObject({
+          attempts: 3,
+          timeout: ONE_MINUTE_IN_MS,
+          removeOnComplete: true,
+        });
+        expect(job.data).toEqual({
+          reportId: report.id,
+          keyword: report.keyword,
+          scrapingJobId: report.scrapingJobId,
         });
       });
     });

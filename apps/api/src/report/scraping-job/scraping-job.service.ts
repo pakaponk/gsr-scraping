@@ -52,7 +52,11 @@ export class ScrapingJobService {
 
     for (const report of reports) {
       this.reportQueue.add(
-        { reportId: report.id, keyword: report.keyword },
+        {
+          reportId: report.id,
+          keyword: report.keyword,
+          scrapingJobId: report.scrapingJobId,
+        },
         {
           jobId: report.id,
           attempts: 3,
