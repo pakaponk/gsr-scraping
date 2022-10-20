@@ -37,6 +37,8 @@ type ReportListProps = {
 };
 
 const ReportList = ({ reports }: ReportListProps) => {
+  const router = useRouter();
+
   return (
     <TableContainer
       width="full"
@@ -65,7 +67,11 @@ const ReportList = ({ reports }: ReportListProps) => {
               updatedAt,
             }) => {
               return (
-                <Tr key={id}>
+                <Tr
+                  key={id}
+                  onClick={() => router.push(`/reports/${id}`)}
+                  _hover={{ bgColor: 'gray.100', cursor: 'pointer' }}
+                >
                   <Td>{keyword}</Td>
                   <Td isNumeric>{totalAdwords}</Td>
                   <Td isNumeric>{totalLinks}</Td>
