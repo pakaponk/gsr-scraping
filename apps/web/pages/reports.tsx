@@ -163,6 +163,7 @@ function SearchForm({ keyword }: { keyword: string }) {
           borderRadius="full"
           backgroundColor="white"
           enterKeyHint="search"
+          placeholder="Keyword"
         />
       </InputGroup>
       <Button
