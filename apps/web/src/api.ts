@@ -108,3 +108,21 @@ export async function fecthReports() {
     throw new Error('Unknown error');
   }
 }
+
+export async function fetchUploadKeywordFile(file: File) {
+  const formData = new FormData();
+
+  formData.append('file', file);
+
+  const res = await fetch(`${BASE_API}/scrapingJobs/upload`, {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+  });
+
+  const json = await res.json();
+
+  if (res.ok) {
+    return json;
+  }
+}
