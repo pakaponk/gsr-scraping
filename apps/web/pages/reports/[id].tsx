@@ -174,7 +174,7 @@ function PreviewHtml({ html }: PreviewHtmlProps) {
           {hasCopied ? 'Copied' : 'Copy to Clipboard'}
         </Button>
       </Flex>
-      <Box maxWidth="full" overflow="hidden" bgColor="black" borderRadius="8px">
+      <Box width="full" overflow="hidden" bgColor="black" borderRadius="8px">
         <Code
           m={4}
           noOfLines={{ base: 10, md: 20 }}
