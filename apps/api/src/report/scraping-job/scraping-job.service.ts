@@ -1,10 +1,16 @@
-import { Prisma, ReportStatus } from '@prisma/client';
+import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
+import { Prisma, ReportStatus, ScrapingJob } from '@prisma/client';
 import { PrismaService } from '../../prisma.service';
+import { ScrapingJobPayload } from './types';
 
 @Injectable()
 export class ScrapingJobService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @InjectQueue('scraping') private reportQueue: Queue<ScrapingJobPayload>,
+  ) {}
 
   createFromKeywords({
     filename,
@@ -35,5 +41,29 @@ export class ScrapingJobService {
         },
       },
     });
+  }
+
+  async addJobToQueue(scrapingJob: ScrapingJob) {
+    const reports = await this.prisma.report.findMany({
+      where: {
+        scrapingJobId: scrapingJob.id,
+      },
+    });
+
+    for (const report of reports) {
+      this.reportQueue.add(
+        {
+          reportId: report.id,
+          keyword: report.keyword,
+          scrapingJobId: report.scrapingJobId,
+        },
+        {
+          jobId: report.id,
+          attempts: 3,
+          timeout: 1000 * 60,
+          removeOnComplete: true,
+        },
+      );
+    }
   }
 }

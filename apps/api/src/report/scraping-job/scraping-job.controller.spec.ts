@@ -6,6 +6,10 @@ import { ScrapingJobService } from './scraping-job.service';
 import { PrismaService } from '../../prisma.service';
 import { userBuilder } from '../../../test/utils/mock';
 import { ReportStatus } from '@prisma/client';
+import { BullModule, getQueueToken } from '@nestjs/bull';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import configuration from '../../config/configuration';
+import { Queue } from 'bull';
 
 const mockUser = userBuilder();
 
@@ -22,15 +26,25 @@ function reqBuilder(overrides: Record<string, any> = {}) {
 describe('ScrapingJobController', () => {
   let controller: ScrapingJobController;
   let prisma: PrismaService;
+  let queue: Queue;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          load: [configuration],
+        }),
+        BullModule.registerQueue({
+          name: 'scraping',
+        }),
+      ],
       controllers: [ScrapingJobController],
-      providers: [ScrapingJobService, PrismaService],
+      providers: [ScrapingJobService, PrismaService, ConfigService],
     }).compile();
 
     controller = module.get<ScrapingJobController>(ScrapingJobController);
     prisma = module.get<PrismaService>(PrismaService);
+    queue = module.get<Queue>(getQueueToken('scraping'));
 
     await prisma.user.create({
       data: mockUser,
@@ -93,6 +107,47 @@ describe('ScrapingJobController', () => {
       });
       expect(createdReports.map(({ keyword }) => keyword)).toEqual(keywords);
     });
+    it('add scrape jobs to queue (Max Attempt: 3, Timeout: 1 minute, Remove on complete)', async () => {
+      const testFilename = 'valid.csv';
+      const testFilePath = path.join(__dirname + '/test', testFilename);
+      const mockReq = reqBuilder({
+        file: () => {
+          return {
+            filename: testFilename,
+            file: fs.createReadStream(testFilePath),
+          };
+        },
+      });
+
+      const { scrapingJob } = await controller.uploadKeywords(mockReq);
+
+      const createdReports = await prisma.report.findMany({
+        where: {
+          scrapingJobId: scrapingJob.id,
+        },
+      });
+
+      const jobs = (
+        await Promise.all(
+          createdReports.map((report) => queue.getJob(report.id)),
+        )
+      ).filter((job) => job !== null);
+
+      const ONE_MINUTE_IN_MS = 60 * 1000;
+      createdReports.forEach((report, index) => {
+        const job = jobs[index];
+        expect(job.opts).toMatchObject({
+          attempts: 3,
+          timeout: ONE_MINUTE_IN_MS,
+          removeOnComplete: true,
+        });
+        expect(job.data).toEqual({
+          reportId: report.id,
+          keyword: report.keyword,
+          scrapingJobId: report.scrapingJobId,
+        });
+      });
+    });
   });
 
   afterEach(async () => {
@@ -101,6 +156,7 @@ describe('ScrapingJobController', () => {
     const deleteReports = prisma.report.deleteMany();
 
     await prisma.$transaction([deleteScrapingJobs, deleteReports, deleteUsers]);
+    await queue.empty();
   });
 
   afterAll(async () => {

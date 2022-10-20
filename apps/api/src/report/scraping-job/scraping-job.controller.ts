@@ -22,6 +22,8 @@ export class ScrapingJobController {
       userId: req.user.userId,
     });
 
+    await this.scrapingJobService.addJobToQueue(scrapingJob);
+
     return {
       scrapingJob,
     };

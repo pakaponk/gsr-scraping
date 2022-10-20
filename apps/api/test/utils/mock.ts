@@ -1,4 +1,4 @@
-import { Report, User } from '@prisma/client';
+import { Report, ScrapingJob, User } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { build, perBuild } from '@jackfranklin/test-data-bot';
 
@@ -46,5 +46,17 @@ export const reportBuilder = build<Report>('Report', {
         status: 'ERROR',
       },
     },
+  },
+});
+
+export const scrapingJobBuilder = build<ScrapingJob>('ScrapingJob', {
+  fields: {
+    id: perBuild(() => faker.datatype.uuid()),
+    userId: null,
+    filename: perBuild(() => `${faker.word.noun()}.csv`),
+    totalKeywords: perBuild(() => faker.datatype.number({ min: 1, max: 100 })),
+    totalScrapedKeywords: 0,
+    createdAt: perBuild(() => new Date()),
+    updatedAt: perBuild(() => new Date()),
   },
 });
