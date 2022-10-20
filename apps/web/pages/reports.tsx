@@ -159,7 +159,8 @@ function SearchForm({ keyword }: { keyword: string }) {
           {...register('keyword', {
             setValueAs: (value) => value.trim(),
           })}
-          type="text"
+          type="search"
+          inputMode="search"
           borderRadius="full"
           backgroundColor="white"
           enterKeyHint="search"
