@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Get,
   Param,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -15,8 +16,14 @@ export class ReportController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  async getCurrentUserReports(@Req() req) {
-    const reports = await this.reportService.findAllByUserId(req.user.userId);
+  async getCurrentUserReports(
+    @Req() req,
+    @Query('keyword') keyword: string | undefined,
+  ) {
+    const reports = await this.reportService.findAllByUserIdAndKeyword(
+      req.user.userId,
+      keyword,
+    );
 
     return {
       reports,

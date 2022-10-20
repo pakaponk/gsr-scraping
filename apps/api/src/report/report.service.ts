@@ -6,10 +6,20 @@ import { PrismaService } from '../prisma.service';
 export class ReportService {
   constructor(private prisma: PrismaService) {}
 
-  async findAllByUserId(userId: string) {
+  async findAllByUserIdAndKeyword(userId: string, keyword?: string) {
+    const keywordWhere =
+      keyword ?? ''
+        ? {
+            keyword: {
+              search: keyword,
+            },
+          }
+        : {};
+
     return this.prisma.report.findMany({
       where: {
         userId,
+        ...keywordWhere,
       },
       select: {
         id: true,
