@@ -47,9 +47,9 @@ describe('ReportController', () => {
       };
       const { reports } = await controller.getCurrentUserReports(mockRequest);
 
-      const expectedReports = mockReports.filter(
-        (report) => report.userId === mockCurrentUser.id,
-      );
+      const expectedReports = mockReports
+        .filter((report) => report.userId === mockCurrentUser.id)
+        .map(({ html, ...rest }) => rest);
       expect(reports).toEqual(expectedReports);
     });
   });

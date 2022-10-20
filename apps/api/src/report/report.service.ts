@@ -10,6 +10,19 @@ export class ReportService {
       where: {
         userId,
       },
+      select: {
+        id: true,
+        userId: true,
+        scrapingJobId: true,
+        keyword: true,
+        status: true,
+        totalAdwords: true,
+        totalLinks: true,
+        totalSearchResults: true,
+        html: false,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
   }
 }
