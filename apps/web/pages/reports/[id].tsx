@@ -13,6 +13,7 @@ import {
   Spacer,
   Spinner,
   Text,
+  useClipboard,
   VStack,
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
@@ -154,6 +155,8 @@ function Stat({ totalLinks, totalAdwords, totalSearchResults }: StateProps) {
 
 type PreviewHtmlProps = Pick<Report, 'html'>;
 function PreviewHtml({ html }: PreviewHtmlProps) {
+  const { hasCopied, onCopy } = useClipboard(html);
+
   return (
     <VStack alignItems="start" spacing={6} width="full">
       <Flex width="full">
@@ -167,8 +170,8 @@ function PreviewHtml({ html }: PreviewHtmlProps) {
           Preview HTML
         </Heading>
         <Spacer />
-        <Button colorScheme="blue" variant="solid" size="sm">
-          Copy to Clipboard
+        <Button colorScheme="blue" variant="solid" size="sm" onClick={onCopy}>
+          {hasCopied ? 'Copied' : 'Copy to Clipboard'}
         </Button>
       </Flex>
       <Box maxWidth="full" overflow="hidden" bgColor="black" borderRadius="8px">
