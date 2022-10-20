@@ -5,6 +5,9 @@
   "main": "index.js",
   "author": "Pakapon Kaewmark <sleep191@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "dev": "lerna run dev --stream"
+  },
   "volta": {
     "node": "16.18.0",
     "yarn": "1.22.19"
