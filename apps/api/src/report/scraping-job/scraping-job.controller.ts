@@ -50,6 +50,7 @@ export class ScrapingJobController {
     });
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async getScrapingJob(@Req() req, @Param('id') id: string) {
     const scrapingJob = await this.scrapingJobService.findById(id);
