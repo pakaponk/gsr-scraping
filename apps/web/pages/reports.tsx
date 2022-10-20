@@ -17,6 +17,7 @@ import {
 } from '@chakra-ui/react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { NextPage } from 'next';
+import { useRouter } from 'next/router';
 import { ChangeEventHandler, PropsWithChildren, useRef } from 'react';
 import { fecthReports, fetchUploadKeywordFile } from '../src/api';
 import { Layout } from '../src/Components/Layout';
@@ -121,6 +122,7 @@ function FileInputButton({
 
 const Reports: NextPage = () => {
   const [{ user }] = useAuth();
+  const router = useRouter();
 
   const { data, isLoading } = useQuery(['my-reports', user?.id], fecthReports);
   const reports = data?.reports ?? [];
@@ -133,7 +135,8 @@ const Reports: NextPage = () => {
     const file = event.target.files?.[0] ?? null;
 
     if (file) {
-      await uploadKeywordFile(file);
+      const { scrapingJob } = await uploadKeywordFile(file);
+      router.push(`/scrapingJobs/${scrapingJob.id}`);
     }
   };
 

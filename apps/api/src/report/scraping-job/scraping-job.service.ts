@@ -1,6 +1,6 @@
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, ReportStatus, ScrapingJob } from '@prisma/client';
 import { PrismaService } from '../../prisma.service';
 import { ScrapingJobPayload } from './types';
@@ -64,6 +64,18 @@ export class ScrapingJobService {
           removeOnComplete: true,
         },
       );
+    }
+  }
+
+  async findById(id: string) {
+    try {
+      return await this.prisma.scrapingJob.findUniqueOrThrow({
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      throw new NotFoundException(error.message);
     }
   }
 }

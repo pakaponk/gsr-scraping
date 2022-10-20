@@ -1,6 +1,14 @@
 import type { BusboyFileStream } from '@fastify/busboy';
 import type { MultipartFile } from '@fastify/multipart';
-import { Controller, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  ForbiddenException,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import * as Papa from 'papaparse';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { ScrapingJobService } from './scraping-job.service';
@@ -40,5 +48,19 @@ export class ScrapingJobController {
         },
       });
     });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async getScrapingJob(@Req() req, @Param('id') id: string) {
+    const scrapingJob = await this.scrapingJobService.findById(id);
+
+    if (req.user.userId !== scrapingJob.userId) {
+      throw new ForbiddenException();
+    }
+
+    return {
+      scrapingJob,
+    };
   }
 }
