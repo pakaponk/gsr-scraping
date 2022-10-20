@@ -38,6 +38,9 @@ export class AuthController {
   @Post('logout')
   async logout(@Session() session: SecureSession) {
     session.delete();
+    session.options({
+      path: '/',
+    });
 
     return { success: true };
   }
