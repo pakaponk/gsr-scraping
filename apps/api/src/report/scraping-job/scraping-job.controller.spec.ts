@@ -1,15 +1,16 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { BullModule, getQueueToken } from '@nestjs/bull';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ReportStatus } from '@prisma/client';
+import { Queue } from 'bull';
 import { ScrapingJobController } from './scraping-job.controller';
 import { ScrapingJobService } from './scraping-job.service';
 import { PrismaService } from '../../prisma.service';
-import { userBuilder } from '../../../test/utils/mock';
-import { ReportStatus } from '@prisma/client';
-import { BullModule, getQueueToken } from '@nestjs/bull';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { scrapingJobBuilder, userBuilder } from '../../../test/utils/mock';
 import configuration from '../../config/configuration';
-import { Queue } from 'bull';
 
 const mockUser = userBuilder();
 
@@ -147,6 +148,50 @@ describe('ScrapingJobController', () => {
           scrapingJobId: report.scrapingJobId,
         });
       });
+    });
+  });
+  describe('GET /scrapingJobs/:id', () => {
+    it('should return the specified job', async () => {
+      const mockScrapingJob = scrapingJobBuilder({
+        overrides: {
+          userId: mockUser.id,
+        },
+      });
+
+      await prisma.scrapingJob.create({ data: mockScrapingJob });
+
+      const mockReq = reqBuilder({ user: { userId: mockUser.id } });
+
+      const { scrapingJob } = await controller.getScrapingJob(
+        mockReq,
+        mockScrapingJob.id,
+      );
+
+      expect(scrapingJob).toEqual(mockScrapingJob);
+    });
+    it('should return 404 NotFound if the specified job does not exist', async () => {
+      const mockReq = reqBuilder({ user: { userId: mockUser.id } });
+
+      await expect(
+        controller.getScrapingJob(mockReq, 'NOT_EXISTED'),
+      ).rejects.toThrowError(NotFoundException);
+    });
+    it('should return 403 Forbidden if the current user does not own the specified job', async () => {
+      const mockScrapingJob = scrapingJobBuilder({
+        overrides: {
+          userId: mockUser.id,
+        },
+      });
+      await prisma.scrapingJob.create({ data: mockScrapingJob });
+
+      const mockAnotherUser = userBuilder();
+      await prisma.user.create({ data: mockAnotherUser });
+
+      const mockReq = reqBuilder({ user: { userId: mockAnotherUser.id } });
+
+      await expect(
+        controller.getScrapingJob(mockReq, mockScrapingJob.id),
+      ).rejects.toThrowError(ForbiddenException);
     });
   });
 
