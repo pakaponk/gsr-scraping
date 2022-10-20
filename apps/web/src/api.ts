@@ -109,6 +109,24 @@ export async function fecthReports() {
   }
 }
 
+export async function fecthReport(id: string) {
+  const res = await fetch(`${BASE_API}/reports/${id}`, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    method: 'GET',
+  });
+
+  const json = await res.json();
+
+  if (res.ok) {
+    return json;
+  } else {
+    throw new Error('Unknown error');
+  }
+}
+
 export async function fetchUploadKeywordFile(file: File) {
   const formData = new FormData();
 
