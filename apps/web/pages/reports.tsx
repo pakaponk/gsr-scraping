@@ -18,10 +18,10 @@ import {
   Tr,
   VStack,
 } from '@chakra-ui/react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { NextPage } from 'next';
 import { ChangeEventHandler, PropsWithChildren, useRef } from 'react';
-import { fecthReports } from '../src/api';
+import { fecthReports, fetchUploadKeywordFile } from '../src/api';
 import { Navbar } from '../src/Components/Navbar';
 import { useAuth } from '../src/Hooks/useAuth';
 
@@ -128,12 +128,15 @@ const Reports: NextPage = () => {
   const { data, isLoading } = useQuery(['my-reports', user?.id], fecthReports);
   const reports = data?.reports ?? [];
 
-  const onUpload: FileInputButtonProps['onFileSelected'] = (event) => {
+  const { mutateAsync: uploadKeywordFile } = useMutation((file: File) => {
+    return fetchUploadKeywordFile(file);
+  });
+
+  const onUpload: FileInputButtonProps['onFileSelected'] = async (event) => {
     const file = event.target.files?.[0] ?? null;
 
     if (file) {
-      // TODO: Upload file to API to start scraping
-      alert(`Upload ${file.name}`);
+      await uploadKeywordFile(file);
     }
   };
 
