@@ -1,14 +1,11 @@
 import {
-  Box,
   Button,
-  Center,
   Container,
   Flex,
   FormControl,
   Heading,
   Input,
   Spacer,
-  Spinner,
   Table,
   TableContainer,
   Tbody,
@@ -22,7 +19,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { NextPage } from 'next';
 import { ChangeEventHandler, PropsWithChildren, useRef } from 'react';
 import { fecthReports, fetchUploadKeywordFile } from '../src/api';
-import { Navbar } from '../src/Components/Navbar';
+import { Layout } from '../src/Components/Layout';
 import { useAuth } from '../src/Hooks/useAuth';
 
 interface Report {
@@ -123,7 +120,7 @@ function FileInputButton({
 }
 
 const Reports: NextPage = () => {
-  const [{ authState, user }] = useAuth();
+  const [{ user }] = useAuth();
 
   const { data, isLoading } = useQuery(['my-reports', user?.id], fecthReports);
   const reports = data?.reports ?? [];
@@ -140,41 +137,22 @@ const Reports: NextPage = () => {
     }
   };
 
-  switch (authState) {
-    case 'PENDING': {
-      return (
-        <Center bgColor="gray.100" minHeight="100vh">
-          <Spinner size="xl" color="blue.500" />
-        </Center>
-      );
-    }
-    case 'AUTHENTICATED': {
-      return (
-        <Box pt="64px" bgColor="gray.100">
-          <Navbar />
-          <Container
-            py={12}
-            minHeight="calc(100vh - 64px)"
-            maxWidth="container.xl"
-          >
-            <VStack spacing={8} alignItems="start">
-              <Flex width="full">
-                <Heading>Reports</Heading>
-                <Spacer />
-                <FileInputButton onFileSelected={onUpload}>
-                  Upload keywords
-                </FileInputButton>
-              </Flex>
-              {!isLoading && <ReportList reports={reports} />}
-            </VStack>
-          </Container>
-        </Box>
-      );
-    }
-    default: {
-      return null;
-    }
-  }
+  return (
+    <Layout>
+      <Container py={12} minHeight="calc(100vh - 64px)" maxWidth="container.xl">
+        <VStack spacing={8} alignItems="start">
+          <Flex width="full">
+            <Heading>Reports</Heading>
+            <Spacer />
+            <FileInputButton onFileSelected={onUpload}>
+              Upload keywords
+            </FileInputButton>
+          </Flex>
+          {!isLoading && <ReportList reports={reports} />}
+        </VStack>
+      </Container>
+    </Layout>
+  );
 };
 
 export default Reports;

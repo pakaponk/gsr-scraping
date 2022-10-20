@@ -15,6 +15,7 @@ import {
 } from '@chakra-ui/react';
 import type { NextPage } from 'next';
 import { useState } from 'react';
+import { Layout } from '../src/Components/Layout';
 import { LoginForm } from '../src/Components/LoginForm';
 import { SignupForm } from '../src/Components/SignupForm';
 
@@ -66,7 +67,7 @@ const Home: NextPage = () => {
   };
 
   return (
-    <Box bgColor="gray.100">
+    <Layout isLoginPage>
       <Container py={12} minH="100vh">
         <VStack spacing="8">
           {isSignupAlertShown && (
@@ -100,7 +101,7 @@ const Home: NextPage = () => {
           </Flex>
         </VStack>
       </Container>
-    </Box>
+    </Layout>
   );
 };
 
