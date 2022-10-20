@@ -126,3 +126,21 @@ export async function fetchUploadKeywordFile(file: File) {
     return json;
   }
 }
+
+export async function fetchScrapingJob(id: string) {
+  const res = await fetch(`${BASE_API}/scrapingJobs/${id}`, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    method: 'GET',
+  });
+
+  const json = await res.json();
+
+  if (res.ok) {
+    return json;
+  } else {
+    throw new Error('Unknown error');
+  }
+}
