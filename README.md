@@ -12,7 +12,7 @@ There are example csv files available at the root directory. feel free to use it
 
 ### Prerequisite
 
-Install [Yarn v1](https://classic.yarnpkg.com/lang/en/), [Docker Desktop](https://www.docker.com/products/docker-desktop) and [Firebase CLI](https://firebase.google.com/docs/cli)
+Install [Yarn v1](https://classic.yarnpkg.com/lang/en/) and [Docker Desktop](https://www.docker.com/products/docker-desktop)
 
 ### Installation
 
