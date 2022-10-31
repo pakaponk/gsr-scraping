@@ -1,4 +1,9 @@
 import './patch';
+import {
+  HttpStatus,
+  UnprocessableEntityException,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import {
@@ -34,8 +39,27 @@ async function bootstrap() {
 
   await app.register(multipart);
 
-  const port = configService.get<number>('port');
+  app.useGlobalPipes(
+    new ValidationPipe({
+      exceptionFactory(errors) {
+        throw new UnprocessableEntityException({
+          statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+          message: 'Validation Failed',
+          fields: errors.flatMap(({ property, constraints }) => {
+            return Object.entries(constraints).map(([code, message]) => {
+              return {
+                name: property,
+                code,
+                message,
+              };
+            });
+          }),
+        });
+      },
+    }),
+  );
 
+  const port = configService.get<number>('port');
   await app.listen(port);
 }
 bootstrap();
