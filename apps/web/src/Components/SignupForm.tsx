@@ -6,10 +6,12 @@ import {
   FormLabel,
   Input,
   Stack,
+  useToast,
 } from '@chakra-ui/react';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { fetchSignup } from '../api';
+import { ResponseError } from '../api/utils';
 
 type FormValue = {
   name: string;
@@ -36,6 +38,8 @@ export function SignupForm({ onSuccess }: SignUpFormProps) {
     }
   );
 
+  const toast = useToast();
+
   const onValid: Parameters<typeof handleSubmit>[0] = async ({
     name,
     email,
@@ -60,10 +64,35 @@ export function SignupForm({ onSuccess }: SignUpFormProps) {
       await signup({ name, email, password });
       onSuccess();
     } catch (error) {
-      setError('email', {
-        type: 'notUnique',
-        message: 'Thie email has already been used',
-      });
+      if (error instanceof ResponseError) {
+        const { status, message, rawError } = error;
+        switch (status) {
+          case 422:
+            const { fields } = rawError as {
+              statusCode: number;
+              message: string;
+              fields: [
+                { name: keyof FormValue; code: string; message: string }
+              ];
+            };
+            fields.map(({ name, code, message }) => {
+              setError(name, {
+                type: code,
+                message: message,
+              });
+            });
+            break;
+          default:
+            toast({
+              title: 'Something went wrong',
+              description: message,
+              status: 'error',
+              duration: 5000,
+              isClosable: true,
+            });
+            break;
+        }
+      }
     }
   };
 
