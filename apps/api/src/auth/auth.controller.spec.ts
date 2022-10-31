@@ -1,3 +1,4 @@
+import { UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as argon2 from 'argon2';
@@ -70,6 +71,42 @@ describe('AuthController', () => {
         throw new Error(
           'Password should be hased with Argon2 before saving to the database',
         );
+      }
+    });
+    it('should return 422 UnprocessableEntity when the given email is already taken', async () => {
+      const mockExistingUser = userBuilder({
+        overrides: { email: 'test@example.com' },
+      });
+      await prisma.user.create({ data: mockExistingUser });
+
+      const mockCreateUserDto = {
+        email: mockExistingUser.email,
+        name: mockExistingUser.name,
+        password: mockExistingUser.password,
+      };
+
+      await expect(
+        controller.localRegister(mockCreateUserDto),
+      ).rejects.toThrowError(UnprocessableEntityException);
+
+      try {
+        await controller.localRegister(mockCreateUserDto);
+      } catch (error) {
+        if (error instanceof UnprocessableEntityException) {
+          expect(error.getResponse()).toMatchInlineSnapshot(`
+            Object {
+              "fields": Array [
+                Object {
+                  "code": "notUnique",
+                  "message": "The email \`test@example.com\` has been taken",
+                  "name": "email",
+                },
+              ],
+              "message": "Validation Failed",
+              "statusCode": 422,
+            }
+          `);
+        }
       }
     });
   });
