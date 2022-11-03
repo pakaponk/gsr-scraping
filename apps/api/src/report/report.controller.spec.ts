@@ -46,11 +46,69 @@ describe('ReportController', () => {
       const mockRequest = {
         user: { userId: mockCurrentUser.id },
       };
-      const { reports } = await controller.getCurrentUserReports(mockRequest);
+      const { reports } = await controller.getCurrentUserReports(
+        mockRequest,
+        undefined,
+      );
 
       const expectedReports = mockReports
         .filter((report) => report.userId === mockCurrentUser.id)
         .map(({ html, ...rest }) => rest);
+      expect(reports).toEqual(expectedReports);
+    });
+    it('return only reports which contain the given keyword if the keyword is specified', async () => {
+      const testKeyword = 'ipad';
+
+      const mockCurrentUser = userBuilder();
+
+      const mockMatchedReports = [
+        reportBuilder({
+          overrides: {
+            userId: mockCurrentUser.id,
+            keyword: `${testKeyword} pro`,
+          },
+        }),
+        reportBuilder({
+          overrides: {
+            userId: mockCurrentUser.id,
+            keyword: `pro ${testKeyword} pro`,
+          },
+        }),
+        reportBuilder({
+          overrides: {
+            userId: mockCurrentUser.id,
+            keyword: `pro ${testKeyword}`,
+          },
+        }),
+      ];
+      const mockUnmatchedReport = [
+        reportBuilder({
+          overrides: {
+            userId: mockCurrentUser.id,
+            keyword: `${testKeyword}anything`,
+          },
+        }),
+      ];
+      const mockReports = [...mockMatchedReports, ...mockUnmatchedReport];
+
+      await prisma.user.create({
+        data: mockCurrentUser,
+      });
+      await prisma.report.createMany({
+        data: mockReports,
+      });
+
+      const mockRequest = {
+        user: { userId: mockCurrentUser.id },
+      };
+      const { reports } = await controller.getCurrentUserReports(
+        mockRequest,
+        testKeyword,
+      );
+
+      const expectedReports = mockMatchedReports.map(
+        ({ html, ...rest }) => rest,
+      );
       expect(reports).toEqual(expectedReports);
     });
   });

@@ -4,7 +4,11 @@ import {
   Flex,
   FormControl,
   Heading,
+  HStack,
+  Icon,
   Input,
+  InputGroup,
+  InputLeftElement,
   Spacer,
   Table,
   TableContainer,
@@ -19,6 +23,8 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { ChangeEventHandler, PropsWithChildren, useRef } from 'react';
+import { useForm } from 'react-hook-form';
+import { FaSearch } from 'react-icons/fa';
 import { fecthReports, fetchUploadKeywordFile } from '../src/api';
 import { Layout } from '../src/Components/Layout';
 import { useAuth } from '../src/Hooks/useAuth';
@@ -126,11 +132,69 @@ function FileInputButton({
   );
 }
 
+function SearchForm({ keyword }: { keyword: string }) {
+  const { register, handleSubmit, setValue } = useForm<{ keyword: string }>();
+
+  const router = useRouter();
+
+  const onValid: Parameters<typeof handleSubmit>[0] = ({ keyword }) => {
+    if (keyword.length > 1) {
+      router.push(`/reports?keyword=${encodeURIComponent(keyword)}`);
+    } else {
+      router.push(`/reports`);
+    }
+  };
+
+  setValue('keyword', keyword);
+
+  return (
+    <HStack as="form" spacing={4} width="full" onSubmit={handleSubmit(onValid)}>
+      <InputGroup width="full" maxWidth="400px">
+        <InputLeftElement
+          pointerEvents="none"
+          // eslint-disable-next-line react/no-children-prop
+          children={<Icon as={FaSearch} color="blue" />}
+        />
+        <Input
+          {...register('keyword', {
+            setValueAs: (value) => value.trim(),
+          })}
+          type="search"
+          inputMode="search"
+          borderRadius="full"
+          backgroundColor="white"
+          enterKeyHint="search"
+          placeholder="Keyword"
+        />
+      </InputGroup>
+      <Button
+        type="submit"
+        borderRadius="8px"
+        colorScheme="blue"
+        variant="solid"
+        onClick={() => {}}
+      >
+        Search
+      </Button>
+    </HStack>
+  );
+}
+
 const Reports: NextPage = () => {
   const [{ user }] = useAuth();
   const router = useRouter();
+  const keyword = (router.query.keyword as string) ?? '';
 
-  const { data, isLoading } = useQuery(['my-reports', user?.id], fecthReports);
+  const { data, isLoading } = useQuery(
+    ['my-reports', user?.id, keyword],
+    () => {
+      if (keyword.length === 0) {
+        return fecthReports();
+      } else {
+        return fecthReports(keyword);
+      }
+    }
+  );
   const reports = data?.reports ?? [];
 
   const { mutateAsync: uploadKeywordFile } = useMutation((file: File) => {
@@ -150,6 +214,7 @@ const Reports: NextPage = () => {
     <Layout>
       <Container py={12} minHeight="calc(100vh - 64px)" maxWidth="container.xl">
         <VStack spacing={8} alignItems="start">
+          <SearchForm keyword={keyword} />
           <Flex width="full">
             <Heading>Reports</Heading>
             <Spacer />
